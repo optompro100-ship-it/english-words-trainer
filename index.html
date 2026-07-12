@@ -1924,7 +1924,7 @@ const words = [
     "ru": "до свидания"
   }
 ];
-const TOTAL=words.length,SUPABASE_URL="https://ilasqwgeklstlfjegpss.supabase.co",SUPABASE_KEY="sb_publishable_ltaNA7nnVozoSCOcZIjg",AUTH_STORE="english-words-cloud-session-v1";
+const TOTAL=words.length,SUPABASE_URL="https://ilasqwgeklstlfjegpss.supabase.co",SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsYXNxd2dla2xzdGxmamVncHNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4ODM2NTAsImV4cCI6MjA5OTQ1OTY1MH0.lkRobk1TNrSzScqhyZBDvL20BJ3k1LL-HEg_wS7li8k",AUTH_STORE="english-words-cloud-session-v1";
 let session=null,userId=null,learned=new Set(),streaks={},learningSeen=new Set(),learningComplete=false,current=null,answered=false,last=null,learnCurrent=null,saving=false;
 const $=id=>document.getElementById(id),els={counter:$("counter"),bar:$("bar"),word:$("word"),wrap:$("wordWrap"),streak:$("streak"),form:$("form"),answer:$("answer"),check:$("check"),feedback:$("feedback"),trainer:$("trainer"),win:$("win"),confetti:$("confetti"),login:$("login"),loginForm:$("loginForm"),loginFeedback:$("loginFeedback"),learning:$("learning"),learnWord:$("learnWord"),learnRu:$("learnRu"),learnProgress:$("learnProgress"),learnNext:$("learnNext"),cloud:$("cloudStatus"),logout:$("logout")};
 function normalize(s){return s.toLocaleLowerCase("ru").trim().replace(/ё/g,"е").replace(/[.!?;:]+$/g,"").replace(/\s+/g," ")}
