@@ -1,0 +1,1943 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>500 английских слов</title>
+<style>
+:root{--ink:#172235;--muted:#667085;--accent:#6757e8;--accent2:#8b7cf6;--ok:#168a5b;--bad:#d33d55;--paper:rgba(255,255,255,.9)}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:radial-gradient(circle at 15% 15%,#ddd8ff 0,transparent 32%),radial-gradient(circle at 85% 85%,#c9f5e5 0,transparent 30%),#f5f6fb;display:grid;place-items:center;padding:24px}
+.app{width:min(680px,100%)}header{margin-bottom:18px}.top{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:12px}.eyebrow{font-size:12px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--accent)}h1{font-size:clamp(22px,5vw,34px);margin:5px 0 0;letter-spacing:-.04em}.counter{font-weight:750;color:var(--muted);white-space:nowrap}.progress{height:10px;background:#e3e5ee;border-radius:999px;overflow:hidden}.progress>div{height:100%;width:0;background:linear-gradient(90deg,var(--accent),#30bd8a);border-radius:inherit;transition:width .5s ease}
+.card{background:var(--paper);border:1px solid rgba(255,255,255,.8);box-shadow:0 24px 70px rgba(34,39,76,.13);backdrop-filter:blur(18px);border-radius:28px;padding:clamp(24px,6vw,48px);text-align:center;overflow:hidden}.word-wrap{min-height:150px;display:grid;place-content:center}.label{color:var(--muted);font-size:14px}.word{font-size:clamp(42px,10vw,72px);line-height:1;font-weight:850;letter-spacing:-.055em;margin:12px 0}.streak{display:flex;justify-content:center;gap:7px}.dot{width:9px;height:9px;border-radius:50%;background:#dfe1e9}.dot.on{background:var(--accent);box-shadow:0 0 0 4px #e8e5ff}
+form{display:flex;gap:10px;margin-top:13px}input{min-width:0;flex:1;border:2px solid #e3e5ed;background:#fff;border-radius:14px;padding:15px 16px;font:inherit;font-size:17px;outline:0;transition:.2s}input:focus{border-color:var(--accent);box-shadow:0 0 0 4px #ebe9ff}button{border:0;border-radius:14px;background:var(--accent);color:white;padding:0 22px;font:inherit;font-weight:750;cursor:pointer;transition:.2s}button:hover{background:#5848d8;transform:translateY(-1px)}button:active{transform:translateY(0)}button.secondary{background:#eceafd;color:#5748cc}
+.feedback{min-height:52px;margin-top:16px;padding:13px 15px;border-radius:14px;font-weight:700;display:grid;place-items:center}.feedback:empty{background:#f5f6f9}.feedback.ok{color:var(--ok);background:#eaf9f3}.feedback.bad{color:var(--bad);background:#fff0f2}.tip{color:var(--muted);font-size:13px;margin-top:16px}.pop{animation:pop .36s ease both}@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.98)}}
+.win{display:none;padding:18px 0 8px}.win.show{display:block;animation:pop .5s ease}.win .emoji{font-size:68px}.win h2{font-size:clamp(30px,7vw,48px);letter-spacing:-.04em;margin:12px 0}.win p{color:var(--muted);font-size:18px}.reset{height:46px;margin-top:12px}.confetti{position:fixed;inset:-10px 0 auto;pointer-events:none}.piece{position:absolute;width:10px;height:16px;border-radius:3px;animation:fall 3.2s linear infinite}@keyframes fall{to{transform:translate3d(var(--drift),110vh,0) rotate(720deg)}}@media(max-width:520px){form{flex-direction:column}button{height:52px}.top{align-items:start;flex-direction:column;gap:8px}.card{border-radius:22px}}
+</style>
+</head>
+<body>
+<main class="app">
+<header><div class="top"><div><div class="eyebrow">Тренажёр слов</div><h1>Английский без зубрёжки</h1></div><div class="counter" id="counter"></div></div><div class="progress"><div id="bar"></div></div></header>
+<section class="card">
+<div id="trainer">
+  <div class="word-wrap" id="wordWrap"><div><div class="label">Переведи на русский</div><div class="word" id="word"></div><div class="streak" id="streak" aria-label="Серия правильных ответов"></div></div></div>
+  <form id="form"><input id="answer" autocomplete="off" placeholder="Введите перевод…" aria-label="Перевод"><button id="check" type="submit">Проверить</button></form>
+  <div class="feedback" id="feedback" aria-live="polite"></div><div class="tip">Три верных ответа подряд — и слово исчезнет из тренировки.</div>
+</div>
+<div class="win" id="win"><div class="emoji">🏆</div><h2>Поздравляю!<br>Ты выучил все слова!</h2><p>Весь список пройден. Отличная работа!</p><button class="reset" id="reset">Начать заново</button></div>
+</section>
+</main>
+<div class="confetti" id="confetti"></div>
+<script>
+const words = [
+  {
+    "en": "people",
+    "ru": "люди"
+  },
+  {
+    "en": "man",
+    "ru": "мужчина"
+  },
+  {
+    "en": "woman",
+    "ru": "женщина"
+  },
+  {
+    "en": "child",
+    "ru": "ребенок"
+  },
+  {
+    "en": "boy",
+    "ru": "мальчик"
+  },
+  {
+    "en": "girl",
+    "ru": "девочка"
+  },
+  {
+    "en": "friend",
+    "ru": "друг"
+  },
+  {
+    "en": "guest",
+    "ru": "гость"
+  },
+  {
+    "en": "family",
+    "ru": "семья"
+  },
+  {
+    "en": "parents",
+    "ru": "родители"
+  },
+  {
+    "en": "father",
+    "ru": "отец"
+  },
+  {
+    "en": "mother",
+    "ru": "мать"
+  },
+  {
+    "en": "husband",
+    "ru": "муж"
+  },
+  {
+    "en": "son",
+    "ru": "сын"
+  },
+  {
+    "en": "daughter",
+    "ru": "дочь"
+  },
+  {
+    "en": "brother",
+    "ru": "брат"
+  },
+  {
+    "en": "sister",
+    "ru": "сестра"
+  },
+  {
+    "en": "grandfather",
+    "ru": "дед"
+  },
+  {
+    "en": "job",
+    "ru": "работа"
+  },
+  {
+    "en": "teacher",
+    "ru": "учитель"
+  },
+  {
+    "en": "driver",
+    "ru": "водитель"
+  },
+  {
+    "en": "worker",
+    "ru": "рабочий"
+  },
+  {
+    "en": "engineer",
+    "ru": "инженер"
+  },
+  {
+    "en": "doctor",
+    "ru": "врач"
+  },
+  {
+    "en": "nurse",
+    "ru": "медсестра"
+  },
+  {
+    "en": "animal",
+    "ru": "животное"
+  },
+  {
+    "en": "cat",
+    "ru": "кошка"
+  },
+  {
+    "en": "dog",
+    "ru": "собака"
+  },
+  {
+    "en": "bird",
+    "ru": "птица"
+  },
+  {
+    "en": "country",
+    "ru": "страна"
+  },
+  {
+    "en": "Russia",
+    "ru": "Россия"
+  },
+  {
+    "en": "England",
+    "ru": "Англия"
+  },
+  {
+    "en": "city",
+    "ru": "город"
+  },
+  {
+    "en": "house",
+    "ru": "дом"
+  },
+  {
+    "en": "building",
+    "ru": "здание"
+  },
+  {
+    "en": "place",
+    "ru": "место, помещение"
+  },
+  {
+    "en": "centre",
+    "ru": "центр"
+  },
+  {
+    "en": "school",
+    "ru": "школа"
+  },
+  {
+    "en": "theater",
+    "ru": "театр"
+  },
+  {
+    "en": "church",
+    "ru": "церковь"
+  },
+  {
+    "en": "restaurant",
+    "ru": "ресторан"
+  },
+  {
+    "en": "hotel",
+    "ru": "гостиница"
+  },
+  {
+    "en": "cinema",
+    "ru": "кинотеатр"
+  },
+  {
+    "en": "hospital",
+    "ru": "больница"
+  },
+  {
+    "en": "post",
+    "ru": "почта"
+  },
+  {
+    "en": "station",
+    "ru": "станция"
+  },
+  {
+    "en": "shop",
+    "ru": "магазин"
+  },
+  {
+    "en": "factory",
+    "ru": "предприятие"
+  },
+  {
+    "en": "square",
+    "ru": "площадь"
+  },
+  {
+    "en": "street",
+    "ru": "улица"
+  },
+  {
+    "en": "road",
+    "ru": "дорога"
+  },
+  {
+    "en": "river",
+    "ru": "река"
+  },
+  {
+    "en": "mountain",
+    "ru": "гора"
+  },
+  {
+    "en": "tree",
+    "ru": "дерево"
+  },
+  {
+    "en": "flat",
+    "ru": "квартира"
+  },
+  {
+    "en": "room",
+    "ru": "зал"
+  },
+  {
+    "en": "bedroom",
+    "ru": "спальня"
+  },
+  {
+    "en": "bathroom",
+    "ru": "ванная"
+  },
+  {
+    "en": "shower",
+    "ru": "душ"
+  },
+  {
+    "en": "kitchen",
+    "ru": "кухня"
+  },
+  {
+    "en": "hall",
+    "ru": "коридор"
+  },
+  {
+    "en": "balcony",
+    "ru": "балкон"
+  },
+  {
+    "en": "floor",
+    "ru": "пол, этаж"
+  },
+  {
+    "en": "door",
+    "ru": "дверь"
+  },
+  {
+    "en": "window",
+    "ru": "окно"
+  },
+  {
+    "en": "furniture",
+    "ru": "мебель"
+  },
+  {
+    "en": "table",
+    "ru": "стол"
+  },
+  {
+    "en": "chair",
+    "ru": "стул"
+  },
+  {
+    "en": "armchair",
+    "ru": "кресло"
+  },
+  {
+    "en": "sofa",
+    "ru": "диван"
+  },
+  {
+    "en": "bed",
+    "ru": "кровать"
+  },
+  {
+    "en": "wardrobe",
+    "ru": "платяной шкаф"
+  },
+  {
+    "en": "shelf",
+    "ru": "полка"
+  },
+  {
+    "en": "mirror",
+    "ru": "зеркало"
+  },
+  {
+    "en": "carpet",
+    "ru": "ковер"
+  },
+  {
+    "en": "fridge",
+    "ru": "холодильник"
+  },
+  {
+    "en": "food",
+    "ru": "еда"
+  },
+  {
+    "en": "bread",
+    "ru": "хлеб"
+  },
+  {
+    "en": "butter",
+    "ru": "масло"
+  },
+  {
+    "en": "cheese",
+    "ru": "сыр"
+  },
+  {
+    "en": "sausage",
+    "ru": "колбаса"
+  },
+  {
+    "en": "meat",
+    "ru": "мясо"
+  },
+  {
+    "en": "chicken",
+    "ru": "цыпленок"
+  },
+  {
+    "en": "fish",
+    "ru": "рыба"
+  },
+  {
+    "en": "egg",
+    "ru": "яйцо"
+  },
+  {
+    "en": "salad",
+    "ru": "салат"
+  },
+  {
+    "en": "mushroom",
+    "ru": "гриб"
+  },
+  {
+    "en": "corn",
+    "ru": "кукуруза"
+  },
+  {
+    "en": "porridge",
+    "ru": "каша"
+  },
+  {
+    "en": "soup",
+    "ru": "суп"
+  },
+  {
+    "en": "sandwich",
+    "ru": "бутерброд"
+  },
+  {
+    "en": "rice",
+    "ru": "рис"
+  },
+  {
+    "en": "pepper",
+    "ru": "перец"
+  },
+  {
+    "en": "salt",
+    "ru": "соль"
+  },
+  {
+    "en": "onion",
+    "ru": "лук"
+  },
+  {
+    "en": "vegetables",
+    "ru": "овощи"
+  },
+  {
+    "en": "potatoes",
+    "ru": "картофель"
+  },
+  {
+    "en": "carrot",
+    "ru": "морковь"
+  },
+  {
+    "en": "tomato",
+    "ru": "помидор"
+  },
+  {
+    "en": "cucumber",
+    "ru": "огурец"
+  },
+  {
+    "en": "cabbage",
+    "ru": "капуста"
+  },
+  {
+    "en": "apple",
+    "ru": "яблоко"
+  },
+  {
+    "en": "banana",
+    "ru": "банан"
+  },
+  {
+    "en": "berry",
+    "ru": "ягода"
+  },
+  {
+    "en": "grape",
+    "ru": "виноград"
+  },
+  {
+    "en": "orange",
+    "ru": "апельсин"
+  },
+  {
+    "en": "sugar",
+    "ru": "сахар"
+  },
+  {
+    "en": "honey",
+    "ru": "мёд"
+  },
+  {
+    "en": "jam",
+    "ru": "варенье"
+  },
+  {
+    "en": "cake",
+    "ru": "булочка"
+  },
+  {
+    "en": "cookie",
+    "ru": "печенье"
+  },
+  {
+    "en": "pie",
+    "ru": "пирог, пирожок"
+  },
+  {
+    "en": "sweet",
+    "ru": "конфета"
+  },
+  {
+    "en": "ice",
+    "ru": "cream - мороженое"
+  },
+  {
+    "en": "chocolate",
+    "ru": "шоколад"
+  },
+  {
+    "en": "water",
+    "ru": "вода"
+  },
+  {
+    "en": "soda",
+    "ru": "газировка"
+  },
+  {
+    "en": "juice",
+    "ru": "сок"
+  },
+  {
+    "en": "tea",
+    "ru": "чай"
+  },
+  {
+    "en": "coffee",
+    "ru": "кофе"
+  },
+  {
+    "en": "milk",
+    "ru": "молоко"
+  },
+  {
+    "en": "cup",
+    "ru": "чашка"
+  },
+  {
+    "en": "glass",
+    "ru": "стакан"
+  },
+  {
+    "en": "spoon",
+    "ru": "ложка"
+  },
+  {
+    "en": "fork",
+    "ru": "вилка"
+  },
+  {
+    "en": "knife",
+    "ru": "нож"
+  },
+  {
+    "en": "saucer",
+    "ru": "блюдце"
+  },
+  {
+    "en": "bottle",
+    "ru": "бутылка"
+  },
+  {
+    "en": "napkin",
+    "ru": "салфетка"
+  },
+  {
+    "en": "breakfast",
+    "ru": "завтрак"
+  },
+  {
+    "en": "lunch",
+    "ru": "обед"
+  },
+  {
+    "en": "dinner",
+    "ru": "ужин"
+  },
+  {
+    "en": "plane",
+    "ru": "самолет"
+  },
+  {
+    "en": "car",
+    "ru": "автомобиль"
+  },
+  {
+    "en": "tram",
+    "ru": "трамвай"
+  },
+  {
+    "en": "bus",
+    "ru": "автобус"
+  },
+  {
+    "en": "train",
+    "ru": "поезд"
+  },
+  {
+    "en": "ship",
+    "ru": "корабль"
+  },
+  {
+    "en": "bicycle",
+    "ru": "велосипед"
+  },
+  {
+    "en": "time",
+    "ru": "время"
+  },
+  {
+    "en": "minute",
+    "ru": "минута"
+  },
+  {
+    "en": "hour",
+    "ru": "час"
+  },
+  {
+    "en": "week",
+    "ru": "неделя"
+  },
+  {
+    "en": "year",
+    "ru": "год"
+  },
+  {
+    "en": "holiday",
+    "ru": "праздник"
+  },
+  {
+    "en": "party",
+    "ru": "вечеринка"
+  },
+  {
+    "en": "yesterday",
+    "ru": "вчера"
+  },
+  {
+    "en": "today",
+    "ru": "сегодня"
+  },
+  {
+    "en": "day",
+    "ru": "день"
+  },
+  {
+    "en": "morning",
+    "ru": "утро"
+  },
+  {
+    "en": "afternoon",
+    "ru": "день"
+  },
+  {
+    "en": "evening",
+    "ru": "вечер"
+  },
+  {
+    "en": "night",
+    "ru": "ночь"
+  },
+  {
+    "en": "Monday",
+    "ru": "понедельник"
+  },
+  {
+    "en": "Tuesday",
+    "ru": "вторник"
+  },
+  {
+    "en": "Wednesday",
+    "ru": "среда"
+  },
+  {
+    "en": "Thursday",
+    "ru": "четверг"
+  },
+  {
+    "en": "Friday",
+    "ru": "пятница"
+  },
+  {
+    "en": "Saturday",
+    "ru": "суббота"
+  },
+  {
+    "en": "Sunday",
+    "ru": "воскресенье"
+  },
+  {
+    "en": "month",
+    "ru": "месяц"
+  },
+  {
+    "en": "January",
+    "ru": "январь"
+  },
+  {
+    "en": "February",
+    "ru": "февраль"
+  },
+  {
+    "en": "March",
+    "ru": "март"
+  },
+  {
+    "en": "April",
+    "ru": "апрель"
+  },
+  {
+    "en": "May",
+    "ru": "май"
+  },
+  {
+    "en": "June",
+    "ru": "июнь"
+  },
+  {
+    "en": "July",
+    "ru": "июль"
+  },
+  {
+    "en": "August",
+    "ru": "август"
+  },
+  {
+    "en": "September",
+    "ru": "сентябрь"
+  },
+  {
+    "en": "October",
+    "ru": "октябрь"
+  },
+  {
+    "en": "November",
+    "ru": "ноябрь"
+  },
+  {
+    "en": "December",
+    "ru": "декабрь"
+  },
+  {
+    "en": "spring",
+    "ru": "весна"
+  },
+  {
+    "en": "summer",
+    "ru": "лето"
+  },
+  {
+    "en": "autumn",
+    "ru": "осень"
+  },
+  {
+    "en": "winter",
+    "ru": "зима"
+  },
+  {
+    "en": "name",
+    "ru": "имя, название"
+  },
+  {
+    "en": "birthday",
+    "ru": "день рождения"
+  },
+  {
+    "en": "address",
+    "ru": "адрес"
+  },
+  {
+    "en": "married",
+    "ru": "женатый/замужняя"
+  },
+  {
+    "en": "thing",
+    "ru": "вещь"
+  },
+  {
+    "en": "pen",
+    "ru": "ручка"
+  },
+  {
+    "en": "book",
+    "ru": "книга"
+  },
+  {
+    "en": "copybook",
+    "ru": "тетрадь"
+  },
+  {
+    "en": "letter",
+    "ru": "письмо"
+  },
+  {
+    "en": "letter",
+    "ru": "письмо, буква"
+  },
+  {
+    "en": "(tele)phone",
+    "ru": "телефон"
+  },
+  {
+    "en": "clock",
+    "ru": "часы"
+  },
+  {
+    "en": "comb",
+    "ru": "расчёска"
+  },
+  {
+    "en": "TV",
+    "ru": "телевизор"
+  },
+  {
+    "en": "iron",
+    "ru": "утюг"
+  },
+  {
+    "en": "soap",
+    "ru": "мыло"
+  },
+  {
+    "en": "bag",
+    "ru": "сумка"
+  },
+  {
+    "en": "present",
+    "ru": "подарок"
+  },
+  {
+    "en": "ball",
+    "ru": "мяч"
+  },
+  {
+    "en": "toy",
+    "ru": "игрушка"
+  },
+  {
+    "en": "ticket",
+    "ru": "билет"
+  },
+  {
+    "en": "key",
+    "ru": "ключ"
+  },
+  {
+    "en": "lamp",
+    "ru": "лампа"
+  },
+  {
+    "en": "glasses",
+    "ru": "очки"
+  },
+  {
+    "en": "towel",
+    "ru": "полотенце"
+  },
+  {
+    "en": "box",
+    "ru": "коробка, ящик"
+  },
+  {
+    "en": "clothes",
+    "ru": "одежда"
+  },
+  {
+    "en": "shoes",
+    "ru": "обувь"
+  },
+  {
+    "en": "coat",
+    "ru": "пальто"
+  },
+  {
+    "en": "dress",
+    "ru": "платье"
+  },
+  {
+    "en": "suit",
+    "ru": "костюм"
+  },
+  {
+    "en": "shirt",
+    "ru": "рубашка"
+  },
+  {
+    "en": "blouse",
+    "ru": "блузка"
+  },
+  {
+    "en": "skirt",
+    "ru": "юбка"
+  },
+  {
+    "en": "glove",
+    "ru": "перчатка"
+  },
+  {
+    "en": "hat",
+    "ru": "шляпа"
+  },
+  {
+    "en": "cap",
+    "ru": "кепка"
+  },
+  {
+    "en": "scarf",
+    "ru": "шарф"
+  },
+  {
+    "en": "sock",
+    "ru": "носок"
+  },
+  {
+    "en": "sweater",
+    "ru": "свитер"
+  },
+  {
+    "en": "T",
+    "ru": "shirt - футболка"
+  },
+  {
+    "en": "tie",
+    "ru": "галстук"
+  },
+  {
+    "en": "trousers",
+    "ru": "брюки, штаны"
+  },
+  {
+    "en": "shorts",
+    "ru": "шорты"
+  },
+  {
+    "en": "weather",
+    "ru": "погода"
+  },
+  {
+    "en": "sun",
+    "ru": "солнце"
+  },
+  {
+    "en": "wind",
+    "ru": "ветер"
+  },
+  {
+    "en": "rain",
+    "ru": "дождь"
+  },
+  {
+    "en": "snow",
+    "ru": "снег"
+  },
+  {
+    "en": "sky",
+    "ru": "небо"
+  },
+  {
+    "en": "music",
+    "ru": "музыка"
+  },
+  {
+    "en": "song",
+    "ru": "песня"
+  },
+  {
+    "en": "picture",
+    "ru": "картина"
+  },
+  {
+    "en": "money",
+    "ru": "деньги"
+  },
+  {
+    "en": "bill",
+    "ru": "счёт"
+  },
+  {
+    "en": "love",
+    "ru": "любовь"
+  },
+  {
+    "en": "problem",
+    "ru": "проблема"
+  },
+  {
+    "en": "question",
+    "ru": "вопрос"
+  },
+  {
+    "en": "what",
+    "ru": "что"
+  },
+  {
+    "en": "where",
+    "ru": "где"
+  },
+  {
+    "en": "why",
+    "ru": "почему"
+  },
+  {
+    "en": "how",
+    "ru": "как"
+  },
+  {
+    "en": "you",
+    "ru": "ты, вы"
+  },
+  {
+    "en": "she",
+    "ru": "она"
+  },
+  {
+    "en": "it",
+    "ru": "оно"
+  },
+  {
+    "en": "we",
+    "ru": "мы"
+  },
+  {
+    "en": "they",
+    "ru": "они"
+  },
+  {
+    "en": "my",
+    "ru": "мой"
+  },
+  {
+    "en": "your",
+    "ru": "твой, ваш"
+  },
+  {
+    "en": "their",
+    "ru": "их"
+  },
+  {
+    "en": "of",
+    "ru": "из, от, о"
+  },
+  {
+    "en": "under",
+    "ru": "под"
+  },
+  {
+    "en": "with",
+    "ru": "с"
+  },
+  {
+    "en": "without",
+    "ru": "без"
+  },
+  {
+    "en": "near",
+    "ru": "возле, рядом"
+  },
+  {
+    "en": "number",
+    "ru": "число"
+  },
+  {
+    "en": "zero",
+    "ru": "ноль"
+  },
+  {
+    "en": "one",
+    "ru": "один"
+  },
+  {
+    "en": "two",
+    "ru": "два"
+  },
+  {
+    "en": "three",
+    "ru": "три"
+  },
+  {
+    "en": "four",
+    "ru": "четыре"
+  },
+  {
+    "en": "five",
+    "ru": "пять"
+  },
+  {
+    "en": "six",
+    "ru": "шесть"
+  },
+  {
+    "en": "seven",
+    "ru": "семь"
+  },
+  {
+    "en": "eight",
+    "ru": "восемь"
+  },
+  {
+    "en": "nine",
+    "ru": "девять"
+  },
+  {
+    "en": "ten",
+    "ru": "десять"
+  },
+  {
+    "en": "eleven",
+    "ru": "одиннадцать"
+  },
+  {
+    "en": "twelve",
+    "ru": "двенадцать"
+  },
+  {
+    "en": "thirteen",
+    "ru": "тринадцать"
+  },
+  {
+    "en": "fourteen",
+    "ru": "четырнадцать"
+  },
+  {
+    "en": "fifteen",
+    "ru": "пятнадцать"
+  },
+  {
+    "en": "sixteen",
+    "ru": "шестнадцать"
+  },
+  {
+    "en": "seventeen",
+    "ru": "семнадцать"
+  },
+  {
+    "en": "eighteen",
+    "ru": "восемнадцать"
+  },
+  {
+    "en": "nineteen",
+    "ru": "девятнадцать"
+  },
+  {
+    "en": "twenty",
+    "ru": "двадцать"
+  },
+  {
+    "en": "thirty",
+    "ru": "тридцать"
+  },
+  {
+    "en": "forty",
+    "ru": "сорок"
+  },
+  {
+    "en": "fifty",
+    "ru": "пятьдесят"
+  },
+  {
+    "en": "sixty",
+    "ru": "шестьдесят"
+  },
+  {
+    "en": "seventy",
+    "ru": "семьдесят"
+  },
+  {
+    "en": "eighty",
+    "ru": "восемьдесят"
+  },
+  {
+    "en": "ninety",
+    "ru": "девяносто"
+  },
+  {
+    "en": "hundred",
+    "ru": "сто"
+  },
+  {
+    "en": "thousand",
+    "ru": "тысяча"
+  },
+  {
+    "en": "colour",
+    "ru": "цвет"
+  },
+  {
+    "en": "black",
+    "ru": "чёрный"
+  },
+  {
+    "en": "blue",
+    "ru": "голубой, cиний"
+  },
+  {
+    "en": "brown",
+    "ru": "коричневый"
+  },
+  {
+    "en": "green",
+    "ru": "зелёный"
+  },
+  {
+    "en": "grey",
+    "ru": "серый"
+  },
+  {
+    "en": "red",
+    "ru": "красный"
+  },
+  {
+    "en": "white",
+    "ru": "белый"
+  },
+  {
+    "en": "yellow",
+    "ru": "жёлтый"
+  },
+  {
+    "en": "pink",
+    "ru": "розовый"
+  },
+  {
+    "en": "adjectives",
+    "ru": "прилагательные"
+  },
+  {
+    "en": "old",
+    "ru": "старый"
+  },
+  {
+    "en": "young",
+    "ru": "молодой"
+  },
+  {
+    "en": "new",
+    "ru": "новый"
+  },
+  {
+    "en": "big",
+    "ru": "большой"
+  },
+  {
+    "en": "small",
+    "ru": "маленький"
+  },
+  {
+    "en": "hungry",
+    "ru": "голодный"
+  },
+  {
+    "en": "good",
+    "ru": "хороший; добрый"
+  },
+  {
+    "en": "bad",
+    "ru": "плохой"
+  },
+  {
+    "en": "early",
+    "ru": "ранний; рано"
+  },
+  {
+    "en": "late",
+    "ru": "поздний; поздно"
+  },
+  {
+    "en": "last",
+    "ru": "последний, прошлый"
+  },
+  {
+    "en": "next",
+    "ru": "следующий"
+  },
+  {
+    "en": "free",
+    "ru": "свободный; бесплатный"
+  },
+  {
+    "en": "busy",
+    "ru": "занятый"
+  },
+  {
+    "en": "hot",
+    "ru": "жаркий; горячий"
+  },
+  {
+    "en": "warm",
+    "ru": "тёплый; тепло"
+  },
+  {
+    "en": "cold",
+    "ru": "холодный; холод"
+  },
+  {
+    "en": "stupid",
+    "ru": "глупый, тупой"
+  },
+  {
+    "en": "clever",
+    "ru": "умный"
+  },
+  {
+    "en": "nice",
+    "ru": "красивый, приятный"
+  },
+  {
+    "en": "beautiful",
+    "ru": "красивый"
+  },
+  {
+    "en": "high",
+    "ru": "высокий"
+  },
+  {
+    "en": "tall",
+    "ru": "высокий (о росте)"
+  },
+  {
+    "en": "short",
+    "ru": "короткий; низкий (о росте)"
+  },
+  {
+    "en": "long",
+    "ru": "длинный; долгий"
+  },
+  {
+    "en": "heavy",
+    "ru": "тяжёлый"
+  },
+  {
+    "en": "light",
+    "ru": "лёгкий; светлый; свет"
+  },
+  {
+    "en": "difficult",
+    "ru": "трудный, тяжелый"
+  },
+  {
+    "en": "easy",
+    "ru": "легкий, нетрудный"
+  },
+  {
+    "en": "dark",
+    "ru": "тёмный"
+  },
+  {
+    "en": "expensive",
+    "ru": "дорогой"
+  },
+  {
+    "en": "cheap",
+    "ru": "дешёвый"
+  },
+  {
+    "en": "poor",
+    "ru": "бедный; плохой"
+  },
+  {
+    "en": "rich",
+    "ru": "богатый"
+  },
+  {
+    "en": "healthy",
+    "ru": "здоровый"
+  },
+  {
+    "en": "sick",
+    "ru": "больной"
+  },
+  {
+    "en": "left",
+    "ru": "левый; cлева; налево"
+  },
+  {
+    "en": "right",
+    "ru": "правый; справа; направо"
+  },
+  {
+    "en": "wrong",
+    "ru": "неправильный"
+  },
+  {
+    "en": "fast",
+    "ru": "быстрый, быстро"
+  },
+  {
+    "en": "slow",
+    "ru": "медленный"
+  },
+  {
+    "en": "sad",
+    "ru": "печальный"
+  },
+  {
+    "en": "glad",
+    "ru": "радостный"
+  },
+  {
+    "en": "happy",
+    "ru": "счастливый"
+  },
+  {
+    "en": "angry",
+    "ru": "сердитый"
+  },
+  {
+    "en": "clean",
+    "ru": "чистый; чистить"
+  },
+  {
+    "en": "dirty",
+    "ru": "грязный"
+  },
+  {
+    "en": "tired",
+    "ru": "усталый"
+  },
+  {
+    "en": "comfortable",
+    "ru": "комфортабельный"
+  },
+  {
+    "en": "tasty",
+    "ru": "вкусный"
+  },
+  {
+    "en": "ready",
+    "ru": "готовый"
+  },
+  {
+    "en": "careful",
+    "ru": "внимательный"
+  },
+  {
+    "en": "sometimes",
+    "ru": "иногда"
+  },
+  {
+    "en": "never",
+    "ru": "никогда"
+  },
+  {
+    "en": "rarely",
+    "ru": "редко"
+  },
+  {
+    "en": "usually",
+    "ru": "обычно"
+  },
+  {
+    "en": "often",
+    "ru": "часто"
+  },
+  {
+    "en": "always",
+    "ru": "всегда"
+  },
+  {
+    "en": "soon",
+    "ru": "скоро"
+  },
+  {
+    "en": "well",
+    "ru": "хорошо; колодец"
+  },
+  {
+    "en": "yes",
+    "ru": "да"
+  },
+  {
+    "en": "no",
+    "ru": "нет"
+  },
+  {
+    "en": "not",
+    "ru": "не"
+  },
+  {
+    "en": "this",
+    "ru": "этот"
+  },
+  {
+    "en": "that",
+    "ru": "тот; что (союз); который"
+  },
+  {
+    "en": "many",
+    "ru": "много"
+  },
+  {
+    "en": "little",
+    "ru": "мало, маленький"
+  },
+  {
+    "en": "some",
+    "ru": "несколько; немного"
+  },
+  {
+    "en": "any",
+    "ru": "несколько; немного"
+  },
+  {
+    "en": "nobody",
+    "ru": "никто"
+  },
+  {
+    "en": "nothing",
+    "ru": "ничто"
+  },
+  {
+    "en": "here",
+    "ru": "здесь; сюда"
+  },
+  {
+    "en": "there",
+    "ru": "там; туда"
+  },
+  {
+    "en": "now",
+    "ru": "сейчас, теперь"
+  },
+  {
+    "en": "then",
+    "ru": "потом; тогда"
+  },
+  {
+    "en": "very",
+    "ru": "очень"
+  },
+  {
+    "en": "every",
+    "ru": "каждый"
+  },
+  {
+    "en": "(an)other",
+    "ru": "другой"
+  },
+  {
+    "en": "all",
+    "ru": "все; всё; весь"
+  },
+  {
+    "en": "so",
+    "ru": "так; итак; поэтому"
+  },
+  {
+    "en": "up",
+    "ru": "вверх"
+  },
+  {
+    "en": "down",
+    "ru": "вниз"
+  },
+  {
+    "en": "together",
+    "ru": "вместе"
+  },
+  {
+    "en": "too",
+    "ru": "тоже; слишком"
+  },
+  {
+    "en": "only",
+    "ru": "только"
+  },
+  {
+    "en": "and",
+    "ru": "и"
+  },
+  {
+    "en": "or",
+    "ru": "или"
+  },
+  {
+    "en": "but",
+    "ru": "но"
+  },
+  {
+    "en": "because",
+    "ru": "потому что, так как"
+  },
+  {
+    "en": "if",
+    "ru": "если; ли"
+  },
+  {
+    "en": "verbs",
+    "ru": "глаголы"
+  },
+  {
+    "en": "be",
+    "ru": "быть, являться"
+  },
+  {
+    "en": "do",
+    "ru": "делать (действовать)"
+  },
+  {
+    "en": "have",
+    "ru": "иметь"
+  },
+  {
+    "en": "can",
+    "ru": "мочь (быть в состоянии)"
+  },
+  {
+    "en": "go",
+    "ru": "идти; уходить"
+  },
+  {
+    "en": "find",
+    "ru": "находить"
+  },
+  {
+    "en": "stand",
+    "ru": "стоять; стенд"
+  },
+  {
+    "en": "sit",
+    "ru": "сидеть"
+  },
+  {
+    "en": "hear",
+    "ru": "слышать"
+  },
+  {
+    "en": "get",
+    "ru": "получать; добираться"
+  },
+  {
+    "en": "make",
+    "ru": "делать"
+  },
+  {
+    "en": "come",
+    "ru": "приходить, приезжать"
+  },
+  {
+    "en": "run",
+    "ru": "бежать"
+  },
+  {
+    "en": "see",
+    "ru": "видеть"
+  },
+  {
+    "en": "write",
+    "ru": "писать"
+  },
+  {
+    "en": "take",
+    "ru": "брать"
+  },
+  {
+    "en": "give",
+    "ru": "давать; дарить"
+  },
+  {
+    "en": "forget",
+    "ru": "забывать"
+  },
+  {
+    "en": "eat",
+    "ru": "есть"
+  },
+  {
+    "en": "say",
+    "ru": "сказать"
+  },
+  {
+    "en": "pay",
+    "ru": "платить"
+  },
+  {
+    "en": "drink",
+    "ru": "пить"
+  },
+  {
+    "en": "swim",
+    "ru": "плавать"
+  },
+  {
+    "en": "sing",
+    "ru": "петь"
+  },
+  {
+    "en": "begin",
+    "ru": "начинать"
+  },
+  {
+    "en": "fly",
+    "ru": "летать; муха"
+  },
+  {
+    "en": "know",
+    "ru": "знать"
+  },
+  {
+    "en": "draw",
+    "ru": "рисовать, чертить"
+  },
+  {
+    "en": "speak",
+    "ru": "разговаривать"
+  },
+  {
+    "en": "choose",
+    "ru": "выбирать"
+  },
+  {
+    "en": "break",
+    "ru": "ломать"
+  },
+  {
+    "en": "show",
+    "ru": "показывать"
+  },
+  {
+    "en": "cut",
+    "ru": "резать"
+  },
+  {
+    "en": "put",
+    "ru": "помещать, ставить, класть"
+  },
+  {
+    "en": "let",
+    "ru": "позволять"
+  },
+  {
+    "en": "read",
+    "ru": "читать"
+  },
+  {
+    "en": "send",
+    "ru": "посылать"
+  },
+  {
+    "en": "spend",
+    "ru": "проводить время"
+  },
+  {
+    "en": "build",
+    "ru": "строить"
+  },
+  {
+    "en": "feel",
+    "ru": "чувствовать"
+  },
+  {
+    "en": "meet",
+    "ru": "встречать"
+  },
+  {
+    "en": "sleep",
+    "ru": "спать"
+  },
+  {
+    "en": "leave",
+    "ru": "покидать; уезжать"
+  },
+  {
+    "en": "buy",
+    "ru": "покупать"
+  },
+  {
+    "en": "bring",
+    "ru": "приносить, привозить"
+  },
+  {
+    "en": "teach",
+    "ru": "учить, обучать"
+  },
+  {
+    "en": "think",
+    "ru": "думать"
+  },
+  {
+    "en": "must",
+    "ru": "быть должным"
+  },
+  {
+    "en": "will",
+    "ru": "для будущего времени"
+  },
+  {
+    "en": "live",
+    "ru": "жить"
+  },
+  {
+    "en": "work",
+    "ru": "работать; работа"
+  },
+  {
+    "en": "watch",
+    "ru": "смотреть; наблюдать"
+  },
+  {
+    "en": "wash",
+    "ru": "мыть, cтирать"
+  },
+  {
+    "en": "try",
+    "ru": "пытаться, пробовать"
+  },
+  {
+    "en": "celebrate",
+    "ru": "праздновать"
+  },
+  {
+    "en": "smile",
+    "ru": "улыбаться; улыбка"
+  },
+  {
+    "en": "laugh",
+    "ru": "смеяться"
+  },
+  {
+    "en": "cry",
+    "ru": "плакать, кричать"
+  },
+  {
+    "en": "learn",
+    "ru": "учить(ся)"
+  },
+  {
+    "en": "change",
+    "ru": "изменять"
+  },
+  {
+    "en": "listen",
+    "ru": "слушать"
+  },
+  {
+    "en": "close",
+    "ru": "закрывать"
+  },
+  {
+    "en": "open",
+    "ru": "открывать; открытый"
+  },
+  {
+    "en": "dance",
+    "ru": "танцевать"
+  },
+  {
+    "en": "ask",
+    "ru": "спрашивать; просить"
+  },
+  {
+    "en": "answer",
+    "ru": "отвечать; ответ"
+  },
+  {
+    "en": "want",
+    "ru": "хотеть"
+  },
+  {
+    "en": "like",
+    "ru": "нравиться"
+  },
+  {
+    "en": "cook",
+    "ru": "варить; готовить"
+  },
+  {
+    "en": "wait",
+    "ru": "ждать"
+  },
+  {
+    "en": "play",
+    "ru": "играть"
+  },
+  {
+    "en": "call",
+    "ru": "звать; звонить"
+  },
+  {
+    "en": "walk",
+    "ru": "гулять; идти пешком"
+  },
+  {
+    "en": "remember",
+    "ru": "запомнить"
+  },
+  {
+    "en": "stay",
+    "ru": "оставаться"
+  },
+  {
+    "en": "help",
+    "ru": "помогать; помощь"
+  },
+  {
+    "en": "visit",
+    "ru": "посещать; визит"
+  },
+  {
+    "en": "jump",
+    "ru": "прыгать; прыжок"
+  },
+  {
+    "en": "travel",
+    "ru": "путешествовать"
+  },
+  {
+    "en": "talk",
+    "ru": "разговаривать; разговор"
+  },
+  {
+    "en": "surprise",
+    "ru": "удивлять; удивление"
+  },
+  {
+    "en": "worry",
+    "ru": "беспокоиться"
+  },
+  {
+    "en": "joke",
+    "ru": "шутить; шутка"
+  },
+  {
+    "en": "hello",
+    "ru": "здравствуйте, привет"
+  },
+  {
+    "en": "sorry",
+    "ru": "извини(те)"
+  },
+  {
+    "en": "please",
+    "ru": "пожалуйста (прошу)"
+  },
+  {
+    "en": "thank you",
+    "ru": "спасибо"
+  },
+  {
+    "en": "goodbye",
+    "ru": "до свидания"
+  }
+];
+const TOTAL=words.length, STORE="english-words-progress-v1";
+const state=JSON.parse(localStorage.getItem(STORE)||"{}");
+let learned=new Set(Array.isArray(state.learned)?state.learned:[]);
+let streaks=state.streaks&&typeof state.streaks==="object"?state.streaks:{};
+let current=null, answered=false, last=null;
+const $=id=>document.getElementById(id), els={counter:$("counter"),bar:$("bar"),word:$("word"),wrap:$("wordWrap"),streak:$("streak"),form:$("form"),answer:$("answer"),check:$("check"),feedback:$("feedback"),trainer:$("trainer"),win:$("win"),confetti:$("confetti")};
+function save(){localStorage.setItem(STORE,JSON.stringify({learned:[...learned],streaks}))}
+function normalize(s){return s.toLocaleLowerCase("ru").trim().replace(/ё/g,"е").replace(/[.!?;:]+$/g,"").replace(/\s+/g," ")}
+function variants(ru){const clean=s=>s.replace(/\([^)]*\)/g,"").trim();return [...new Set([ru,...ru.split(/[;,/]/)])].map(clean).filter(Boolean).map(normalize)}
+function update(){const left=TOTAL-learned.size;els.counter.textContent="Осталось слов: "+left+" / "+TOTAL;els.bar.style.width=((learned.size/TOTAL)*100)+"%"}
+function dots(){const n=Number(streaks[current]||0);els.streak.innerHTML=[0,1,2].map(i=>'<i class="dot '+(i<n?"on":"")+'"></i>').join("")}
+function next(){update();if(learned.size>=TOTAL){victory();return}const pool=words.map((_,i)=>i).filter(i=>!learned.has(i)&&i!==last);const fallback=words.map((_,i)=>i).filter(i=>!learned.has(i));current=(pool.length?pool:fallback)[Math.floor(Math.random()*(pool.length?pool.length:fallback.length))];last=current;answered=false;els.word.textContent=words[current].en;els.answer.value="";els.answer.disabled=false;els.check.textContent="Проверить";els.check.className="";els.feedback.textContent="";els.feedback.className="feedback";dots();els.wrap.classList.remove("pop");void els.wrap.offsetWidth;els.wrap.classList.add("pop");els.answer.focus()}
+function check(e){e.preventDefault();if(answered){next();return}const value=normalize(els.answer.value);if(!value){els.feedback.textContent="Введите перевод";els.feedback.className="feedback bad";return}answered=true;els.answer.disabled=true;const ok=variants(words[current].ru).includes(value);if(ok){streaks[current]=Number(streaks[current]||0)+1;if(streaks[current]>=3){learned.add(current);delete streaks[current];els.feedback.textContent="✓ Слово выучено и удалено из списка";}else els.feedback.textContent="✓ Верно! Ещё "+(3-streaks[current])+" подряд";els.feedback.className="feedback ok"}else{streaks[current]=0;els.feedback.textContent="Правильный перевод: "+words[current].ru;els.feedback.className="feedback bad"}save();update();dots();els.check.textContent=learned.size>=TOTAL?"Завершить":"Следующее";els.check.className="secondary";els.answer.focus()}
+function victory(){els.trainer.hidden=true;els.win.classList.add("show");els.confetti.innerHTML=Array.from({length:70},(_,i)=>'<i class="piece" style="left:'+(Math.random()*100)+'%;background:hsl('+(Math.random()*360)+' 80% 58%);animation-delay:'+(-Math.random()*3)+'s;animation-duration:'+(2.5+Math.random()*2)+'s;--drift:'+(-80+Math.random()*160)+'px"></i>').join("")}
+els.form.addEventListener("submit",check);$("reset").addEventListener("click",()=>{if(confirm("Сбросить весь прогресс и начать сначала?")){localStorage.removeItem(STORE);location.reload()}});
+update();next();
+</script>
+</body>
+</html>
